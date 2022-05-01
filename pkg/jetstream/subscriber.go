@@ -325,14 +325,14 @@ func (s *Subscriber) subscribe(topic string, cb nats.MsgHandler) (*nats.Subscrip
 	opts := s.config.SubscribeOptions
 
 	if s.config.DurableName != "" {
-		opts = append(opts, nats.Durable(s.config.DurableName))
+		opts = append(opts, nats.Durable(s.topicInterpreter.durableNameCalculator(s.config.DurableName, topic)))
 	} else {
 		opts = append(opts, nats.BindStream(""))
 	}
 
 	return s.js.QueueSubscribe(
 		primarySubject,
-		s.config.QueueGroup,
+		s.topicInterpreter.queueGroupCalculator(s.config.QueueGroup, topic),
 		cb,
 		opts...,
 	)
