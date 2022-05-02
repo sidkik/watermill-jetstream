@@ -286,8 +286,13 @@ func (s *Subscriber) Subscribe(ctx context.Context, topic string) (<-chan *messa
 				// unblock
 			}
 
-			if err := sub.Unsubscribe(); err != nil {
-				s.logger.Error("Cannot unsubscribe", err, subscriberLogFields)
+			// do not unsubscribe if it is a durable subscription
+			// if the lib created the subscription, it will delete it!!!!!!
+			// only delete if the durable name is not set
+			if s.config.DurableName == "" {
+				if err := sub.Unsubscribe(); err != nil {
+					s.logger.Error("Cannot unsubscribe", err, subscriberLogFields)
+				}
 			}
 		}(sub, subscriberLogFields)
 	}
